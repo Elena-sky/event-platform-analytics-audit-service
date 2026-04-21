@@ -12,6 +12,45 @@ Async **RabbitMQ consumer** for the event platform: subscribes to the `events.to
 - [event-platform-retry-orchestrator-service](https://github.com/Elena-sky/event-platform-retry-orchestrator-service)
 - [event-platform-infra](https://github.com/Elena-sky/event-platform-infra)
 
+## Architecture
+
+This service is a **fan-out consumer** — it receives every event independently of the notification flow. If analytics-audit-service is down, gateway-api and notification-service continue operating without any impact.
+
+## Flow
+
+```mermaid
+flowchart TD
+    ET(["events.topic"])
+    ET -->|"binding: #  (all events)"| AQ["analytics.events queue"]
+
+    AQ --> DEC{"Decode JSON\n+ validate EventEnvelope"}
+    DEC -->|parse / schema error| NACK["nack requeue=False"]
+
+    DEC -->|ok| DUP{"duplicate\nevent_id?"}
+    DUP -->|yes| SKIP["ack — skip\nno side-effects"]
+    DUP -->|no| REPO["AuditRepository\nappend to audit-events.jsonl"]
+    REPO --> CNT["AnalyticsService\nincrement counters"]
+    CNT --> ACK["ack ✓"]
+```
+
+```mermaid
+flowchart LR
+    subgraph "Counters updated per event"
+        C1["events.total"]
+        C2["events.by_type.{event_type}"]
+        C3["events.by_source.{source}"]
+        C4["events.by_domain.{domain}\ne.g. user, order, payment"]
+    end
+
+    subgraph "HTTP API  :8010"
+        H1["GET /health"]
+        H2["GET /analytics/snapshot"]
+        H3["GET /analytics/by-type/{event_type}"]
+    end
+
+    C1 & C2 & C3 & C4 -.->|read| H2 & H3
+```
+
 ## Requirements
 
 - **Python 3.12 or 3.13** (3.13 recommended). On **Python 3.14**, installing `pydantic-core` from `requirements.txt` often fails during build — use 3.12/3.13 or wait for wheels for your Python version.
