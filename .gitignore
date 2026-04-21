@@ -1,11 +1,13 @@
 .env
 .idea/
 .venv/
+.venv-ci/
 __pycache__/
 *.pyc
 *.pyo
 .pytest_cache/
 .ruff_cache/
+.coverage
 dist/
 *.egg-info/
 
