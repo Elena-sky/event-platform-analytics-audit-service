@@ -9,8 +9,8 @@ from aio_pika import ExchangeType, IncomingMessage
 
 from app.core.config import settings
 from app.core.logging import get_logger
-from app.messaging.amqp_retry import connect_robust_when_ready
 from app.domain.models import EventEnvelope
+from app.messaging.amqp_retry import connect_robust_when_ready
 from app.services.audit_handler import DuplicateEventError, handle_event
 
 logger = get_logger(__name__)

@@ -1,4 +1,4 @@
-"""Wait until RabbitMQ accepts the first AMQP connection (Docker / broker startup race)."""
+"""Boot-time helper: retry AMQP until RabbitMQ accepts the connection."""
 
 from __future__ import annotations
 
