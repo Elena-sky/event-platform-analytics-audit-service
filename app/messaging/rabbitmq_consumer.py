@@ -10,6 +10,7 @@ from aio_pika import ExchangeType, IncomingMessage
 from app.core.config import settings
 from app.core.logging import get_logger
 from app.domain.models import EventEnvelope
+from app.messaging.amqp_retry import connect_robust_when_ready
 from app.services.audit_handler import DuplicateEventError, handle_event
 
 logger = get_logger(__name__)
@@ -28,7 +29,10 @@ class AnalyticsConsumer:
 
     async def start(self) -> None:
         """Connect, declare topology, and block consuming messages."""
-        self._connection = await aio_pika.connect_robust(settings.rabbitmq_url)
+        self._connection = await connect_robust_when_ready(
+            settings.rabbitmq_url,
+            logger=logger,
+        )
         self._channel = await self._connection.channel()
         await self._channel.set_qos(prefetch_count=settings.rabbitmq_prefetch)
 
