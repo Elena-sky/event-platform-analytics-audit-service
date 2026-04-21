@@ -3,16 +3,13 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
 from collections.abc import Iterator
-from unittest.mock import patch
+from datetime import UTC, datetime
 
 import pytest
-from fastapi.testclient import TestClient
-
 from app.domain.models import EventEnvelope
 from app.services import analytics_service as _as_module
-
+from fastapi.testclient import TestClient
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -33,7 +30,7 @@ def _register(event_type: str, source: str = "test") -> None:
             event_id=uuid.uuid4(),
             event_type=event_type,
             source=source,
-            occurred_at=datetime.now(tz=timezone.utc),
+            occurred_at=datetime.now(tz=UTC),
             payload={},
         )
     )

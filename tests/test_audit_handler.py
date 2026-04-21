@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Iterator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from app.domain.models import EventEnvelope
 from app.services import audit_handler as ah
 from app.services.audit_handler import DuplicateEventError, handle_event
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -24,7 +22,7 @@ def _make_event(event_type: str = "user.registered") -> EventEnvelope:
         event_id=uuid.uuid4(),
         event_type=event_type,
         source="frontend",
-        occurred_at=datetime.now(tz=timezone.utc),
+        occurred_at=datetime.now(tz=UTC),
         payload={},
     )
 
@@ -91,7 +89,9 @@ def test_duplicate_event_raises_duplicate_error() -> None:
             handle_event(event)
 
 
-def test_duplicate_event_does_not_call_repository_again(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_duplicate_event_does_not_call_repository_again(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     mock_repo = MagicMock()
     monkeypatch.setattr(ah, "audit_repository", mock_repo)
     monkeypatch.setattr(ah, "analytics_service", MagicMock())

@@ -4,25 +4,26 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Iterator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
-
 from app.domain.models import EventEnvelope
 from app.services.analytics_service import AnalyticsService, _extract_domain
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
 
-def _make_event(event_type: str = "user.registered", source: str = "frontend") -> EventEnvelope:
+def _make_event(
+    event_type: str = "user.registered",
+    source: str = "frontend",
+) -> EventEnvelope:
     return EventEnvelope(
         event_id=uuid.uuid4(),
         event_type=event_type,
         source=source,
-        occurred_at=datetime.now(tz=timezone.utc),
+        occurred_at=datetime.now(tz=UTC),
         payload={},
     )
 

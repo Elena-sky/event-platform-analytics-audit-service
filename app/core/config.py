@@ -41,7 +41,8 @@ class Settings(BaseSettings):
     @property
     def binding_keys(self) -> list[str]:
         """Parsed list of AMQP binding keys from the comma-separated env variable."""
-        return [item.strip() for item in self.rabbitmq_binding_keys.split(",") if item.strip()]
+        raw = self.rabbitmq_binding_keys.split(",")
+        return [item.strip() for item in raw if item.strip()]
 
 
 settings = Settings()
