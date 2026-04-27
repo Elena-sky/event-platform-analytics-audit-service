@@ -31,14 +31,16 @@ async def _start_declares_analytics_queue_as_quorum() -> None:
 
     consumer = AnalyticsConsumer()
 
-    with patch(
-        "app.messaging.rabbitmq_consumer.connect_robust_when_ready",
-        AsyncMock(return_value=connection),
+    with (
+        patch(
+            "app.messaging.rabbitmq_consumer.connect_robust_when_ready",
+            AsyncMock(return_value=connection),
+        ),
+        suppress(asyncio.TimeoutError),
     ):
         # ``start()`` blocks on ``await asyncio.Future()`` after setup —
         # break out via a short timeout once topology is declared.
-        with suppress(asyncio.TimeoutError):
-            await asyncio.wait_for(consumer.start(), timeout=0.1)
+        await asyncio.wait_for(consumer.start(), timeout=0.1)
 
     queue_calls = channel.declare_queue.call_args_list
     assert len(queue_calls) == 1, (
