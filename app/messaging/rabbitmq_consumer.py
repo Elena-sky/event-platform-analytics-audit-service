@@ -15,6 +15,8 @@ from app.services.audit_handler import DuplicateEventError, handle_event
 
 logger = get_logger(__name__)
 
+QUORUM_QUEUE_ARGS: dict[str, str] = {"x-queue-type": "quorum"}
+
 
 class AnalyticsConsumer:
     """Durable consumer bound to ``events.topic`` with configurable binding keys.
@@ -45,6 +47,7 @@ class AnalyticsConsumer:
         queue = await self._channel.declare_queue(
             settings.rabbitmq_queue,
             durable=True,
+            arguments=QUORUM_QUEUE_ARGS,
         )
 
         for binding_key in settings.binding_keys:
