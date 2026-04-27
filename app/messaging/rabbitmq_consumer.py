@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 
 QUORUM_QUEUE_ARGS: dict[str, str] = {"x-queue-type": "quorum"}
 
+
 class AnalyticsConsumer:
     """Durable consumer bound to ``events.topic`` with configurable binding keys.
 
