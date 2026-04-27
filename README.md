@@ -18,10 +18,20 @@ This service is a **fan-out consumer** — it receives every event independently
 
 ## Flow
 
+**Happy path (read left → right):** every event copy bound with `#` lands in **`analytics.events`** (**quorum** queue) and is processed **in order** decode → (optional skip) → audit file → counters → ack. The next diagram is the same flow with all branches.
+
+```mermaid
+flowchart LR
+    ETx(["events.topic"]) -->|binding #| Qx(["analytics.events\nquorum"])
+    Qx --> Sx["decode\nvalidate\ndedupe"]
+    Sx --> Ax["audit JSONL\n+ counters"]
+    Ax --> Acks["ack"]
+```
+
 ```mermaid
 flowchart TD
     ET(["events.topic"])
-    ET -->|"binding: #  (all events)"| AQ["analytics.events queue"]
+    ET -->|"binding: #  (all events)"| AQ["analytics.events\nquorum"]
 
     AQ --> DEC{"Decode JSON\n+ validate EventEnvelope"}
     DEC -->|parse / schema error| NACK["nack requeue=False"]
