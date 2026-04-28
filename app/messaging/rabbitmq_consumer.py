@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.core.logging import get_logger
 from app.domain.models import EventEnvelope
 from app.messaging.amqp_retry import connect_robust_when_ready
-from app.services.audit_handler import DuplicateEventError, handle_event
+from app.services.audit_handler import handle_event
 
 logger = get_logger(__name__)
 
@@ -74,7 +74,7 @@ class AnalyticsConsumer:
             payload = self._decode_payload(message)
             event = EventEnvelope.model_validate(payload)
 
-            handle_event(event)
+            await handle_event(event)
 
             await message.ack()
 
@@ -85,10 +85,6 @@ class AnalyticsConsumer:
                     "event_type": event.event_type,
                 },
             )
-
-        except DuplicateEventError as exc:
-            logger.warning("Duplicate event skipped", extra={"error": str(exc)})
-            await message.ack()  # safe to discard — already processed
 
         except Exception as exc:
             logger.exception(

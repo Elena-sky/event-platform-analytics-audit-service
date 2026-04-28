@@ -23,6 +23,10 @@ class Settings(BaseSettings):
 
     audit_log_path: str
 
+    redis_host: str
+    redis_port: int
+    idempotency_ttl_seconds: int
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -37,6 +41,10 @@ class Settings(BaseSettings):
             f"amqp://{self.rabbitmq_user}:{self.rabbitmq_password}"
             f"@{self.rabbitmq_host}:{self.rabbitmq_port}/"
         )
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.redis_host}:{self.redis_port}/0"
 
     @property
     def binding_keys(self) -> list[str]:
