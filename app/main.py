@@ -8,6 +8,7 @@ from app.api import app
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
 from app.messaging.rabbitmq_consumer import AnalyticsConsumer
+from app.services.idempotency_store import idempotency_store
 
 configure_logging()
 logger = get_logger(__name__)
@@ -34,7 +35,11 @@ async def main() -> None:
         "Starting analytics-audit-service",
         extra={"service": settings.app_name, "env": settings.app_env},
     )
-    await asyncio.gather(_run_consumer(), _run_api())
+    await idempotency_store.connect()
+    try:
+        await asyncio.gather(_run_consumer(), _run_api())
+    finally:
+        await idempotency_store.close()
 
 
 if __name__ == "__main__":

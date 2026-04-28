@@ -11,6 +11,11 @@ def test_rabbitmq_url_format() -> None:
     assert url.endswith("/")
 
 
+def test_redis_url_format() -> None:
+    assert settings.redis_url.startswith("redis://")
+    assert "localhost:6379" in settings.redis_url
+
+
 def test_binding_keys_single_wildcard() -> None:
     """test.env sets RABBITMQ_BINDING_KEYS=# — should parse to a one-element list."""
     keys = settings.binding_keys
